@@ -1,14 +1,14 @@
 (function () {
     window.Ava = window.Ava || {};
 
-    var Neat = neataptic.Neat
-    var Config = neataptic.Config
-    // Config.warnings = false
+    var Neat = Ava.Neat = neataptic.Neat
+    var Config = Ava.Config = neataptic.Config
+    Config.warnings = false
 
     var View = Ava.View = function ($el, milliS) {
         this.$el = $el;
         this.milliS = milliS;
-        this.neat = new Neat(12, 2, null, NEAT_SETTINGS);
+        this.neat = new Ava.Neat(11, 2, null, NEAT_SETTINGS);
         this.gridHeight = VIEW_HEIGHT;
         this.gridWidth = VIEW_WIDTH;
         this.waveTime = ICE_WAVE_TIME;
@@ -95,7 +95,7 @@
         this.neat.sort();
 
         var stats = this.neat.population.slice(0, 10).map(function (player) {
-            return player.score;
+            return Math.round(Math.sqrt(player.score));
         }).join('<br>');
         // {
         //     generation: this.neat.generation,
@@ -126,6 +126,7 @@
             return;
         }
         $('#score-info').text(this.board.cycles);
+        $('#players-info').text(this.board.players.length);
         if (this.board.players.length) {
             this.board.cycle();
             this.paint();
@@ -152,7 +153,8 @@
 
     View.prototype.buildGrid = function () {
         this.$el.append('<div id="round-info" class="grid-info" data-round="1">Round 1</div>')
-        this.$el.append('<div id="score-info" class="grid-info" data-score="0.000">0.00s</div>')
+        this.$el.append('<div id="score-info" class="grid-info" data-score="0">0</div>')
+        this.$el.append('<div id="players-info" class="grid-info" data-score="0">0</div>')
         for (var i = 0; i < this.gridHeight; i++) {
             var row = $('<div class="row">');
             for (var j = 0; j < this.gridWidth; j++) {
@@ -188,7 +190,7 @@
         var speed = 'fast';
         if (this.milliS === 20) { speed = 'slow'; }
         if (this.milliS === 10) { speed = 'medium'; }
-        if (score > this.scoreCookie.read(speed) && this.sessionScore) {
+        if (score > this.scoreCookie.read(speed) && score > this.sessionScore) {
             this.scoreCookie.create(speed, score);
             this.sessionScore = score;
             $('#high-score').text(score);

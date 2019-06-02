@@ -48,7 +48,7 @@
     // };
 
     Player.prototype.move = function (board, deadlyIce, warningIce, closeIce, nearIce) {
-        var neatInputs = this.checkIce(deadlyIce, warningIce, closeIce, nearIce);
+        var neatInputs = this.checkIce(board.jNeatInputs, deadlyIce, warningIce, closeIce, nearIce);
         var neatOutputs = this.brain.activate(neatInputs).map(Math.round);
         // four possible outcomes:
         //    move left: (0 right) - (1 left) = -1
@@ -56,23 +56,18 @@
         //      no move: (0 right) - (0 left) =  0
         //      no move: (1 right) - (1 left) =  0
         var jPos = neatOutputs[0] - neatOutputs[1];
+        this.faceLeft = jPos === 0 ? this.faceLeft : (jPos === -1 ? true : false);
         this.position = this.position.plus(new Coord(0, jPos), board);
-
-        // give score if new position has less close ice
-        var score = 1 - this.checkIce(deadlyIce, warningIce, closeIce, nearIce)[5] - neatInputs[5];
-        if (deadlyIce[this.position.j]) {
-            score -= 10;
-        } else if (warningIce[this.position.j]) {
-            score -= 2;
-        }
-        this.brain.score = score;
     };
 
-    Player.prototype.checkIce = function (deadlyIce, warningIce, closeIce, nearIce) {
+    Player.prototype.checkIce = function (jNeatInputs, deadlyIce, warningIce, closeIce, nearIce) {
         var j = this.position.j;
+        if (jNeatInputs[j]) {
+            return jNeatInputs[j];
+        }
         var leftOne = loopPos(j - 1, this.view.gridWidth);
         var rightOne = loopPos(j + 1, this.view.gridWidth);
-        var icePositions = [
+        return jNeatInputs[j] = [
             deadlyIce[leftOne] ? 1 : 0,   // ice to left
             warningIce[leftOne] ? 1 : 0,  // ice up 1 left
             closeIce[leftOne] ? 1 : 0,  // ice up 2 left
@@ -85,10 +80,6 @@
             nearIce[rightOne] ? 1 : 0,  // ice up 3 right
             deadlyIce[rightOne] ? 1 : 0    // ice to right
         ];
-        icePositions.push(icePositions.reduce(function (sum, n) { // close ice count
-            return sum += n;
-        }, 0));
-        return icePositions;
     }
 
     var Ice = Ava.Ice = function (position, waveTime) {
@@ -139,7 +130,7 @@
 
         this.players = this.players.filter(function (player) {
             if (deadlyIce[player.position.j]) {
-                player.brain.score += this.cycles;
+                player.brain.score += this.cycles * this.cycles;
                 this.playerResults.push(player);
                 return false;
             }
@@ -147,6 +138,7 @@
         }.bind(this));
 
         if (this.cycles % PLAYER_MOVE_TIME === 0) {
+            this.jNeatInputs = {};
             this.players.forEach(function (player) {
                 player.move(this, deadlyIce, warningIce, closeIce, nearIce);
             }.bind(this));

@@ -79,6 +79,9 @@ button:hover { background-color: #829DBA; }
 #score-info {
   top: 25px;
 }
+#players-info {
+  top: 45px;
+}
 
 #info {
   position: absolute;
