@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Avalanche</title>
+    <link rel="icon" type="image/png" href="images/snowball.png">
+    <link href="http://fonts.googleapis.com/css?family=Amaranth" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="scss/reset.css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="scss/styles.css" media="screen" charset="utf-8">
+  </head>
+  <body>
+    <div id="round-over">
+      <h1>Round Over</h1>
+      <p id="round-score"></p>
+      <button id="start-round" type="button" class="start-game">Next Round</button>
+    </div>
+
+    <div id="avalanche" data-pos1="100" data-pos2="300" data-pos3="600">
+      <button type="button" class="start-game">Play</button>
+    </div>
+
+    <div id="info">
+      <h1>Speed</h1>
+      <hr>
+      <button type="button" id="play-slow">Slow</button>
+      <button type="button" id="play-medium">Medium</button>
+      <button type="button" id="play-fast" class="active">Fast</button>
+
+      <h1>High Score</h1>
+      <hr>
+      <p id="high-score" data-score="0">0</p>
+
+      <!-- <h1>Controls</h1>
+      <hr>
+      <div class="control-wrap">
+        <p>move left</p>
+        <img src="images/arrow-left-key.png"> <span>/</span> <img src="images/a-key.png">
+        <p>move right</p>
+        <img src="images/arrow-right-key.png"> <span>/</span> <img src="images/d-key.png">
+        <p>pause</p>
+        <img src="images/spacebar.png" class="spacebar"> <span>
+      </div> -->
+    </div>
+
+    <script src="js/jquery.js"></script>
+    <script src="js/neataptic.min.js"></script>
+    <script src="js/cookie.js"></script>
+    <script src="js/constants.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/view.js"></script>
+
+    <script type="text/javascript">
+      var setHS = function (speed) {
+        var hsC = new Ava.Cookie();
+        var highScore = hsC.read(speed);
+        if (highScore) {
+          $('#high-score').text(highScore + ' seconds');
+        } else {
+          $('#high-score').text('0.00 seconds');
+        }
+      };
+
+      $(function () {
+        setHS('medium');
+      });
+
+      $('.start-game').click(function () {
+        $('#round-over').css('display','');
+        $('#avalanche').css('background-position', '-3600px 450px, -3300px 270px, -3100px 0px');
+        $('#avalanche').data('pos3', 3600);
+        $('#avalanche').data('pos2', 3300);
+        $('#avalanche').data('pos1', 3100);
+        var $el = $('#avalanche');
+        $el.html('');
+        var view = new Ava.View($el, milliS);
+      });
+
+      var milliS = 5;
+
+      $('#play-slow').click(function (e) {
+        e.preventDefault();
+        removeActive();
+        e.currentTarget.blur();
+        $(e.currentTarget).addClass('active');
+        milliS = 20;
+        setHS('slow');
+      });
+
+      $('#play-medium').click(function (e) {
+        e.preventDefault();
+        removeActive();
+        e.currentTarget.blur();
+        $(e.currentTarget).addClass('active')
+        milliS = 10;
+        setHS('medium');
+      });
+
+      $('#play-fast').click(function (e) {
+        e.preventDefault();
+        removeActive();
+        e.currentTarget.blur();
+        $(e.currentTarget).addClass('active');
+        milliS = 5;
+        setHS('fast');
+      });
+
+      var removeActive = function () {
+        $('button').removeClass('active');
+      };
+    </script>
+  </body>
+</html>
